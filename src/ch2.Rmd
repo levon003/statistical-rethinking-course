@@ -1,0 +1,14 @@
+---
+title: "Statistical Rethinking Notes - Chapter 2"
+author: Zachary Levonian
+date: 2022
+output: pdf_document
+---
+
+# Chapter 2
+
+Notes on chapter 2.
+
+```{r}
+dbinom(6, 9, 0.7)
+```
