@@ -9,6 +9,39 @@ output: pdf_document
 
 Notes on chapter 2.
 
+Bayesian data analysis:
+For each possible explanation of the data,
+Count all the ways the data can happen.
+Explanations with more ways to produce the data are more plausible.
+
+$\text{Pr}(W, L|p) = \frac{(W + L)!}{W!L!}p^W(1-p)^L$ where $W$ is the number of water hits and $L$ is the number of land hits.
+
 ```{r}
 dbinom(6, 9, 0.7)
 ```
+
+```{r}
+plot(1:100, dbinom(1:100, 100, 0.7))
+```
+
+```{r}
+xs <- seq(0, 1, 0.001)
+plot(xs, dbinom(9, 9, xs), type="l", col="blue", 
+     main="Binomial density plot for different number of hits (of 9 total)")
+lines(xs, dbinom(5, 9, xs), col="green")
+lines(xs, dbinom(6, 9, xs), col="red")
+lines(xs, dbinom(7, 9, xs), col="gray")
+lines(xs, dbinom(8, 9, xs), col="black")
+legend(0, 1, 
+       legend=c("5 hits", "6 hits", "7 hits", "8 hits", "9 hits"),
+       col=c("green", "red", "gray", "black", "blue"), 
+       lty=1, cex=0.8,
+       box.lty=0)
+
+```
+
+Question 1: why is it okay to set the prior to 1 (rather than 1 / sum(prior))? (in the code example given in the lecture) (answer: because we will normalize after anyway, so it doesn't matter.)
+
+Question 2: why is the evidence of a single W or L a line (and not some other shape)?
+
+
