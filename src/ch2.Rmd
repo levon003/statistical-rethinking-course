@@ -5,6 +5,11 @@ date: 2022
 output: pdf_document
 ---
 
+```{r}
+library(rethinking)
+```
+
+
 # Chapter 2
 
 Notes on chapter 2.
@@ -18,6 +23,11 @@ $\text{Pr}(W, L|p) = \frac{(W + L)!}{W!L!}p^W(1-p)^L$ where $W$ is the number of
 
 ```{r}
 dbinom(6, 9, 0.7)
+```
+
+```{r}
+xs <- seq(0, 1, 0.01)
+plot(xs, dbinom(6, 9, xs))
 ```
 
 ```{r}
@@ -42,6 +52,58 @@ legend(0, 1,
 
 Question 1: why is it okay to set the prior to 1 (rather than 1 / sum(prior))? (in the code example given in the lecture) (answer: because we will normalize after anyway, so it doesn't matter.)
 
-Question 2: why is the evidence of a single W or L a line (and not some other shape)?
+Question 2: why is the evidence of a single W or L a line (and not some other shape)? (answer: garden of forking data; we assume a model where the number of ways that the true proportion is some value p is determined by the number of "paths" that end up at that proportion given the observed data.)
+
+Question 3: can we choose a different likelihood function?
+More specifically: say there is some down-stream variable causally associated with the true probability of observing p. e.g. planetoids are either "land-likely" or "water-likely", where "water-likely" planets have a true distribution that is linearly decreasing from p(water) = 1 to p(water) = 0, while "land-likely" planets have the opposite. These planets occur at the same rate, so a flat prior is appropriate (i.e., absent data on whether a planetoid is land- or water-likely, there is a uniform probability of any proportion of water on that planet).
+In this case, it seems like maybe we want a different likelihood function!
+(Or should we? I think this is a false example, since land-likeliness needs to assign some probability mass to p(water), otherwise we shouldn't hold a uniform distribution.)
+"For each possible value of the unobserved variables, we need to define the relative number of ways — the probability — that the values of each observed variable could arise."
+"So that we don’t have to literally count, we can use a mathematical function that tells us the right plausibility. In conventional statistics, a distribution function assigned to an observed variable is usually called a _likelihood_.
+
+## Book code
+
+```{r}
+len <- 30
+# define grid
+p_grid <- seq(from=0, to=1, length.out=len )
+# define prior
+#prior <- rep(1 , len)  # rep = repeat
+prior <- exp( -5*abs( p_grid - 0.5 ) )
+
+# compute likelihood at each value in grid
+likelihood <- dbinom(6 , size=9, prob=p_grid)
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+# standardize the posterior, so it sums to 1
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+# plot the prior
+plot(1:len, prior, type='l')
+```
+
+```{r}
+plot( p_grid, posterior, type="b",
+xlab="probability of water" , ylab="posterior probability" )
+mtext(sprintf("%d points", len))
+```
+
+```{r}
+globe.qa <- quap(
+  alist(
+    W ~ dbinom( W+L ,p) , # binomial likelihood
+    p ~ dunif(0,1) # uniform prior
+  ) ,
+  data=list(W=6,L=3)
+)
+# display summary of quadratic approximation
+precis( globe.qa )
+```
+
+
+## Homework
+
+```{r}
+```
 
 
