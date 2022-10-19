@@ -62,6 +62,14 @@ In this case, it seems like maybe we want a different likelihood function!
  - "For each possible value of the unobserved variables, we need to define the relative number of ways — the probability — that the values of each observed variable could arise."
  - "So that we don’t have to literally count, we can use a mathematical function that tells us the right plausibility. In conventional statistics, a distribution function assigned to an observed variable is usually called a _likelihood_."
  - "The probability of the data, often called the likelihood, provides the plausibility of an observation (data), given a fixed value for the parameters."
+ - On data vs parameters: "It is typical to conceive of data and parameters as completely different kinds of entities. Data are measured and known; parameters are unknown and must be estimated from data. Usefully, in the Bayesian framework the distinction between a datum and a parameter is not so fundamental. Sometimes we observe a variable, but sometimes we do not. In that case, the same distribution function applies, even though we didn’t observe the variable. As a result, the same assumption can look like a “likelihood” or a “prior,” depending upon context, without any change to the model."
+
+Question 4: fun to think about the ball-drawing example. What if the data and the parameter are "flipped"?
+Consider our data is that we are told by an employee that the proportion is 50/50.
+(In 2.1.2, "Combining other information", they give an example where information is given by the factory and incorporated with prior draw data.)
+
+Let's ask: what's the plausibility of drawing a Blue vs a White marble given an observation about the true proportion? This problem is harder than the ones we've been solving in Chapter 2, since our OBSERVATION is continuous (a percentage/proportion). So, will need to come back to this question later, I think...
+
 
 ## Book code
 
@@ -103,7 +111,7 @@ precis( globe.qa )
 ```
 
 
-## Homework
+## Book problems
 
 2M1. 
 ```{r, figures-side, fig.show="hold", out.width="33%"}
@@ -135,3 +143,82 @@ plot_posterior(c("W", "W", "W", "L"))
 plot_posterior(c("L", "W", "W", "L", "W", "W", "W"))
 ```
 
+
+2M3. Suppose there are two globes, one for Earth and one for Mars. The Earth globe is 70% covered in water. The Mars globe is 100% land. Further suppose that one of these globes—you don’t know which—was tossed in the air and produced a “land” observation. Assume that each globe was equally likely to be tossed. Show that the posterior probability that the globe was the Earth, conditional on seeing “land” (Pr(Earth|land)), is 0.23.
+
+ - Knowns: Pr(Earth) = 0.5. Pr(L|Earth) = 0.3. 
+ - Pr(L|Earth) = Pr(Earth|L) * Pr(L) / Pr(Earth) by Bayes Theorem.
+ Rearrange to find Pr(Earth|L) = Pr(L|Earth) * Pr(Earth) / Pr(L).
+ Replace knowns: Pr(Earth|L) = 0.3 * 0.5 / Pr(L).
+ - What is Pr(L)? Pr(L) = Pr(L|Earth) * Pr(Earth) + Pr(L|Mars) * Pr(Mars) = 0.3 * 0.5 + 1 * 0.5 = 0.65.
+ - Thus, Pr(Earth|L) = 0.3 * 0.5 / 0.65 = 0.23.
+ 
+```{r}
+0.3 * 0.5 + 1 * 0.5
+0.3 * 0.5 / 0.65
+```
+ 
+
+## Homework 1
+
+1. Suppose the globe tossing data (Chapter 2) had turned out to be 4 water and 11 land. Construct the posterior distribution, using grid approximation. Use the same flat prior as in the book.
+
+```{r}
+plot_posterior <- function(W, L, len=1000) {
+  # define grid
+  p_grid <- seq(from=0, to=1, length.out=len )
+  # define prior
+  prior <- rep(1 , len)  # rep = repeat
+  
+  # compute likelihood at each value in grid
+  likelihood <- dbinom(W, size=W+L, prob=p_grid)
+  # compute product of likelihood and prior
+  unstd.posterior <- likelihood * prior
+  # standardize the posterior, so it sums to 1
+  posterior <- unstd.posterior / sum(unstd.posterior)
+  
+  # plot the prior
+  plot(p_grid, posterior, type="l", 
+      xlab="probability of water", 
+      ylab="posterior probability"
+  )
+  mtext(sprintf("Grid approximation (n=%d) given %d W and %d L", len, W, L))
+}
+plot_posterior(4, 11)
+```
+
+
+2. Now suppose the data are 4 water and 2 land. Compute the posterior again, but this time use a prior that is zero below p = 0.5 and a constant above p = 0.5. This corresponds to prior information that a majority of the Earth’s surface is water.
+
+```{r}
+plot_posterior <- function(W, L, len=1000) {
+  # define grid
+  p_grid <- seq(from=0, to=1, length.out=len )
+  # define prior
+  prior <- ifelse(p_grid < 0.5, 0, 1)
+  
+  # compute likelihood at each value in grid
+  likelihood <- dbinom(W, size=W+L, prob=p_grid)
+  # compute product of likelihood and prior
+  unstd.posterior <- likelihood * prior
+  # standardize the posterior, so it sums to 1
+  posterior <- unstd.posterior / sum(unstd.posterior)
+  
+  # plot the prior
+  plot(p_grid, posterior, type="l", 
+      xlab="probability of water", 
+      ylab="posterior probability"
+  )
+  mtext(sprintf("Grid approximation (n=%d) given %d W and %d L", len, W, L))
+}
+plot_posterior(4, 2)
+```
+
+
+3. For the posterior distribution from 2, compute 89% percentile and HPDI intervals. Compare the widths of these intervals. Which is wider? Why? If you had only the information in the interval, what might you misunderstand about the shape of the posterior distribution?
+
+```{r}
+
+```
+
+4. Suppose there is bias in sampling so that Land is more likely than Water to be recorded. Specifically, assume that 1-in-5 (20%) of Water samples are accidentally recorded instead as "Land". First, write a generative simulation of this sampling process. Assuming the true proportion of Water is 0.70, what proportion does your simulation tend to produce instead? Second, using a simulated sample of 20 tosses, compute the unbiased posterior distribution of the true proportion of water.

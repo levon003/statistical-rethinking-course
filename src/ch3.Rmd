@@ -1,0 +1,40 @@
+---
+title: "Statistical Rethinking Notes - Chapter 3"
+author: Zachary Levonian
+date: 2022
+output: pdf_document
+---
+
+# Chapter 3
+
+```{r, message=FALSE}
+library(rethinking)
+```
+
+```{r}
+p_grid <- seq( from=0 , to=1 , length.out=1000 )
+prob_p <- rep( 1 , 1000 )
+prob_data <- dbinom( 4 , size=6 , prob=p_grid )
+posterior <- prob_data * prob_p
+posterior <- posterior / sum(posterior)
+```
+
+```{r}
+plot(p_grid, posterior, type="l")
+```
+
+
+
+```{r, figures-side, fig.show="hold", out.width="50%"}
+samples <- sample( p_grid , prob=posterior , size=1e4 , replace=TRUE )
+plot(samples)
+dens(samples)
+lines(p_grid, posterior * 1000, lty=2)  # why do I need to multiply by 1000?
+```
+
+```{r}
+
+```
+
+
+
