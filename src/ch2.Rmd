@@ -5,7 +5,7 @@ date: 2022
 output: pdf_document
 ---
 
-```{r}
+```{r, message=FALSE}
 library(rethinking)
 ```
 
@@ -58,8 +58,10 @@ Question 3: can we choose a different likelihood function?
 More specifically: say there is some down-stream variable causally associated with the true probability of observing p. e.g. planetoids are either "land-likely" or "water-likely", where "water-likely" planets have a true distribution that is linearly decreasing from p(water) = 1 to p(water) = 0, while "land-likely" planets have the opposite. These planets occur at the same rate, so a flat prior is appropriate (i.e., absent data on whether a planetoid is land- or water-likely, there is a uniform probability of any proportion of water on that planet).
 In this case, it seems like maybe we want a different likelihood function!
 (Or should we? I think this is a false example, since land-likeliness needs to assign some probability mass to p(water), otherwise we shouldn't hold a uniform distribution.)
-"For each possible value of the unobserved variables, we need to define the relative number of ways — the probability — that the values of each observed variable could arise."
-"So that we don’t have to literally count, we can use a mathematical function that tells us the right plausibility. In conventional statistics, a distribution function assigned to an observed variable is usually called a _likelihood_.
+
+ - "For each possible value of the unobserved variables, we need to define the relative number of ways — the probability — that the values of each observed variable could arise."
+ - "So that we don’t have to literally count, we can use a mathematical function that tells us the right plausibility. In conventional statistics, a distribution function assigned to an observed variable is usually called a _likelihood_."
+ - "The probability of the data, often called the likelihood, provides the plausibility of an observation (data), given a fixed value for the parameters."
 
 ## Book code
 
@@ -103,7 +105,33 @@ precis( globe.qa )
 
 ## Homework
 
-```{r}
+2M1. 
+```{r, figures-side, fig.show="hold", out.width="33%"}
+plot_posterior <- function(obs, len=1000) {
+  W <- length(which(obs == "W"))
+  L <- length(obs) - W
+  
+  # define grid
+  p_grid <- seq(from=0, to=1, length.out=len )
+  # define prior
+  prior <- rep(1 , len)  # rep = repeat
+  
+  # compute likelihood at each value in grid
+  likelihood <- dbinom(W, size=W+L, prob=p_grid)
+  # compute product of likelihood and prior
+  unstd.posterior <- likelihood * prior
+  # standardize the posterior, so it sums to 1
+  posterior <- unstd.posterior / sum(unstd.posterior)
+  
+  # plot the prior
+  plot(p_grid, posterior, type="l", 
+      xlab="probability of water", 
+      ylab="posterior probability"
+  )
+  mtext(sprintf("Grid (n=%d) given %s", len, paste(obs, collapse=" ")))
+}
+plot_posterior(c("W", "W", "W"))
+plot_posterior(c("W", "W", "W", "L"))
+plot_posterior(c("L", "W", "W", "L", "W", "W", "W"))
 ```
-
 
