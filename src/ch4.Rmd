@@ -1,0 +1,19 @@
+---
+title: "Statistical Rethinking Notes - Chapter 4"
+author: Zachary Levonian
+date: 2022
+output: pdf_document
+---
+
+# Chapter 4 - Geometric Models
+
+## Book code and notes
+
+```{r, message=FALSE}
+library(rethinking)
+library(scales)  # for alpha in the plots
+```
+
+```{r}
+```
+

@@ -7,6 +7,8 @@ output: pdf_document
 
 # Chapter 3
 
+## Book code and notes
+
 ```{r, message=FALSE}
 library(rethinking)
 library(scales)  # for alpha in the plots
@@ -27,7 +29,7 @@ plot(p_grid, posterior, type="l")
 
 
 ```{r, figures-side, fig.show="hold", out.width="50%"}
-samples <- sample( p_grid , prob=posterior , size=1e4 , replace=TRUE )
+samples <- sample(p_grid, prob=posterior, size=1e4, replace=TRUE)
 plot(samples)
 dens(samples)
 lines(p_grid, posterior * 1000, lty=2)  # why do I need to multiply by 1000?
@@ -75,3 +77,65 @@ polygon(c(x[x>=lb & x<ub], ub, lb), c(posterior[x>=lb & x<ub], 0, 0), col=alpha(
 p_grid[which.max(posterior)]
 chainmode(samples , adj=0.01)  # samples based approximation
 ```
+
+
+Absolute loss:
+```{r}
+loss <- sapply( p_grid , function(d) sum( posterior*abs( d - p_grid ) ) )
+p_grid[which.min(loss)]
+median(samples)
+```
+
+Key point: "Different loss functions nominate different point estimates."
+
+```{r}
+dummy_w <- rbinom(1e5, size=9, prob=0.7)
+simplehist(dummy_w, xlab="dummy water count")
+```
+
+```{r}
+n <- 1e5
+size <- 9
+prob <- 0.7
+breaks <- 0:size
+
+dummy_w <- rbinom(n, size=size, prob=prob)
+hg1 <- hist(dummy_w, plot=FALSE, breaks=breaks)
+dummy_w <- rbinom(n, size=size, prob=prob)
+#dummy_w <- sample(p_grid, prob=posterior, size=n, replace=TRUE)
+hg2 <- hist(dummy_w, plot=FALSE, breaks=breaks)
+plot(hg1, col=alpha("#008999", 0.4)) # Plot 1st histogram using a transparent color
+plot(hg2, col=alpha("#FF3399", 0.4), add = TRUE) # Add 2nd histogram using different color
+```
+
+```{r}
+# "simulated observations averaged over the posterior"
+# in other words, this is a realization of the posterior in a sample
+w <- rbinom(1e4 , size=9 , prob=samples)
+hist(w, breaks=0:9)
+```
+
+## Book problems
+
+```{r}
+p_grid <- seq( from=0 , to=1 , length.out=1000 )
+prior <- rep( 1 , 1000 )
+likelihood <- dbinom( 6 , size=9 , prob=p_grid )
+posterior <- likelihood * prior
+posterior <- posterior / sum(posterior)
+set.seed(100)
+samples <- sample( p_grid , prob=posterior , size=1e4 , replace=TRUE)
+```
+
+```{r}
+sum(samples < 0.2) / length(samples)
+sum(samples > 0.8) / length(samples)
+sum(samples > 0.2 & samples < 0.8) / length(samples)
+quantile(samples, probs=c(0.2, 0.8))
+HPDI(samples, 0.66)
+PI(samples, 0.66)
+```
+
+
+
+
