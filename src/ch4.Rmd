@@ -15,5 +15,51 @@ library(scales)  # for alpha in the plots
 ```
 
 ```{r}
+growth <- replicate( 10000 , prod( 1 + runif(12,0,0.5) ) )
+dens( growth , norm.comp=TRUE, main="Multiplicative noise, large")
+
+growth <- replicate( 10000 , prod( 1 + runif(12,0,0.01) ) )
+dens( growth , norm.comp=TRUE, main="Multiplicative noise, small" )
+
+growth <- replicate( 10000 , log(prod( 1 + runif(12,0,0.5) ) ))
+dens( growth , norm.comp=TRUE, main="Multiplicative noise, large, logged")
 ```
+
+ - On the usefulness of Gaussians: "Repeatedly adding finite fluctuations results in a distribution of sums that have shed all information about the underlying process, aside from mean and spread."
+
+
+```{r}
+# linear model coefficients can be used as a Generative model
+alpha <- 0
+beta <- 0.5
+sigma <- 5
+n_individuals <- 100
+
+H <- runif(n_individuals, 130, 170)  # height
+
+mu <- alpha + beta*H
+W <- rnorm(n_individuals, mean=mu, sd=sigma)  # weight
+plot(H, W)
+xs = min(H):max(H)
+ys = alpha + beta*xs
+lines(xs, ys)
+```
+
+```{r}
+data(Howell1)
+d <- Howell1[Howell1$age >= 18,]
+nrow(d)
+```
+
+```{r}
+xs = seq(0, 10, 0.01)
+plot(xs, dlnorm(xs, meanlog=0, sdlog=1), type='l')
+```
+
+## Week 2 Homework
+
+
+
+
+
 
